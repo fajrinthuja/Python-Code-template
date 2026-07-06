@@ -2,6 +2,7 @@ import sys
 import math
 import bisect
 from collections import namedtuple
+from functools import cmp_to_key
 
 sys.setrecursionlimit(300000)
 
@@ -23,7 +24,7 @@ def cmp(a, b):
     elif a > b:
         return 1
     else:
-        return 0 
+        return 0
 
 def solve(iterator):
     # C++: vector<int> a(n);        -> Python:
@@ -59,7 +60,7 @@ def solve(iterator):
 
     # ---------- custom comparator (sort by key function) ----------
     # e.g. sort by absolute value, ties broken by original value ascending
-    a.sort(key=cmp)
+    a.sort(key=cmp_to_key(cmp))
     print("custom sort:", a)
 
         # --- vector<pair<int,int>> -> Python: list of tuples ---
