@@ -16,12 +16,12 @@ def token_generator():
             yield token
 
 def solve(iterator):
-    try:
+    # try:
         n = int(next(iterator))
         a = [int(next(iterator)) for _ in range(n)]
         print(a)
-    except StopIteration:
-        return
+    # except StopIteration:
+    #     return
 
 def main():
     iterator = token_generator()
