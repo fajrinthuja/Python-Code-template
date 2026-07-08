@@ -24,7 +24,7 @@ def solve(iterator):
         # for i in range(n):
         #     x = int(next(iterator))
         #     a.append(x)
-        a = [5] * n
+        a = [0] * n
         for i in range(n):
             a[i] = int(next(iterator))
         print(f"Original List: {a}")
