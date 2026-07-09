@@ -16,12 +16,17 @@ def token_generator():
             yield token
 
 def solve(iterator):
-    # try:
-        n = int(next(iterator))
-        a = [int(next(iterator)) for _ in range(n)]
-        print(a)
-    # except StopIteration:
-    #     return
+    n = int(next(iterator))
+    a = [0] * n
+    for i in range(n):
+        a[i] = int(next(iterator))
+    maxi = 0
+    ans = 0
+    for i in range (n):
+        maxi = max(maxi,a[i])
+        ans += maxi - a[i]
+    print(ans)
+    pass
 
 def main():
     iterator = token_generator()
