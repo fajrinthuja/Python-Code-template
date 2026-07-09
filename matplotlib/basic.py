@@ -191,7 +191,109 @@ def demo_subplots():
     fig.suptitle('Subplot grid demo')
     fig.tight_layout()
 
+# ----------------------------------------------------------------------
+# 9. Stem Plot (Discrete-Time Signals)
+#    stem() is mainly used in DSP for discrete-time signals.
+#    linefmt   -> color/style of stems
+#    markerfmt -> marker style/color
+#    basefmt   -> baseline style
+# ----------------------------------------------------------------------
+def demo_stem():
+    n = np.arange(-8, 9)
+    x1 = np.cos(np.pi * n / 4)
+    x2 = 0.7 * np.sin(np.pi * n / 3)
 
+    plt.figure(figsize=(8,4))
+
+    # First discrete signal
+    markerline1, stemlines1, baseline1 = plt.stem(
+        n,
+        x1,
+        linefmt='b-',
+        markerfmt='bo',
+        basefmt=' '
+    )
+    markerline1.set_label("cos($\\pi n/4$)")
+
+    # Second discrete signal
+    markerline2, stemlines2, baseline2 = plt.stem(
+        n,
+        x2,
+        linefmt='r-',
+        markerfmt='rs',
+        basefmt=' '
+    )
+    markerline2.set_label("0.7 sin($\\pi n/3$)")
+
+    plt.title("Stem Plot (Discrete-Time Signals)")
+    plt.xlabel("n")
+    plt.ylabel("Amplitude")
+    plt.grid(True)
+    plt.legend()
+
+
+# ----------------------------------------------------------------------
+# 10. Multiple / Grouped Bar Charts
+#    Demonstrates
+#      1. Side-by-side bars
+#      2. Bars at arbitrary x positions
+# ----------------------------------------------------------------------
+def demo_multiple_bars():
+
+    labels = ['A', 'B', 'C', 'D']
+
+    set1 = [5, 8, 4, 6]
+    set2 = [6, 4, 7, 5]
+    set3 = [3, 5, 6, 8]
+
+    x = np.arange(len(labels))
+    width = 0.25
+
+    plt.figure(figsize=(8,4))
+
+    # Three bars beside each other
+    plt.bar(x - width, set1,
+            width=width,
+            color='tab:blue',
+            label='Set 1')
+
+    plt.bar(x,
+            set2,
+            width=width,
+            color='tab:red',
+            label='Set 2')
+
+    plt.bar(x + width,
+            set3,
+            width=width,
+            color='tab:green',
+            label='Set 3')
+
+    plt.xticks(x, labels)
+    plt.title("Grouped Bar Chart")
+    plt.xlabel("Category")
+    plt.ylabel("Value")
+    plt.legend()
+    plt.grid(axis='y')
+
+    # ----------------------------------------------------------
+    # Another example:
+    # Bars placed at arbitrary x-locations
+    # ----------------------------------------------------------
+
+    plt.figure(figsize=(8,4))
+
+    xpos = [1, 3, 6, 8]
+
+    plt.bar(xpos[0], 5, width=0.5, color='tab:blue')
+    plt.bar(xpos[1], 3, width=0.5, color='tab:red')
+    plt.bar(xpos[2], 7, width=0.5, color='tab:green')
+    plt.bar(xpos[3], 4, width=0.5, color='tab:purple')
+
+    plt.title("Bars at Different Positions")
+    plt.xlabel("x")
+    plt.ylabel("Height")
+    plt.grid(axis='y')
 # ----------------------------------------------------------------------
 # Original-style solve(): reads n points from stdin and plots them,
 # with a horizontal reference line and a sine curve overlaid.
@@ -240,7 +342,9 @@ def main():
     # demo_scatter()
     # demo_bar()
     # demo_vertical_bar()
-    demo_subplots()
+    # demo_subplots()
+    # demo_stem()
+    demo_multiple_bars()
     plt.show()  # shows all demo figures at once
 
     # Uncomment to also run the stdin-driven solve() on real input:
