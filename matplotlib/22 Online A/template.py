@@ -91,7 +91,7 @@ def main():
     t = np.linspace(T_MIN, T_MAX, N)
     x = x_of_t(t)
 
-    k = 0.5   # sub-scaling factor
+    k = 3   # sub-scaling factor
     y = time_scale(t, x, k)
 
     plot_pair(
