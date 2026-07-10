@@ -47,6 +47,8 @@ def interpolate_signal(
 
         y[i] = (x_original[low] + x_original[high]) / 2
 
+    # return x_of_t(t_query)
+
     return y
 
         
