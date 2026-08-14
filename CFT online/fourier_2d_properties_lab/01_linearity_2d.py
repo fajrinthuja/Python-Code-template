@@ -3,52 +3,51 @@
 2D PROPERTY 01: LINEARITY / SUPERPOSITION
 ===============================================================================
 Mathematical Formula:
-    Spatial Domain:   y(t1, t2) = a * x1(t1, t2) + b * x2(t1, t2)
-    Frequency Domain: Y(u, v)   = a * X1(u, v) + b * X2(u, v)
+    Spatial Domain:   y(x, y) = a * I1(x, y) + b * I2(x, y)
+    Frequency Domain: Y(u, v) = a * F1(u, v) + b * F2(u, v)
 ===============================================================================
 """
 import numpy as np
 import matplotlib.pyplot as plt
 
-def compute_2d_cft(signal_2d, t1, t2, u, v):
-    """Computes 2D continuous Fourier transform using separable trapezoidal integration."""
-    T1, T2 = np.meshgrid(t1, t2)
-    X_uv = np.zeros((len(v), len(u)), dtype=complex)
-    for i, v_val in enumerate(v):
-        for j, u_val in enumerate(u):
-            kernel = np.exp(-1j * 2 * np.pi * (u_val * T1 + v_val * T2))
-            integrand = signal_2d * kernel
-            if hasattr(np, 'trapezoid'):
-                int_t1 = np.trapezoid(integrand, t1, axis=1)
-                X_uv[i, j] = np.trapezoid(int_t1, t2, axis=0)
-            else:
-                int_t1 = np.trapz(integrand, t1, axis=1)
-                X_uv[i, j] = np.trapz(int_t1, t2, axis=0)
-    return X_uv
+class CFT2D:
+    def __init__(self, I, x, y, u, v):
+        self.I = I; self.x = x; self.y = y; self.u = u; self.v = v
 
-# Spatial & Frequency Grids
-t1 = np.linspace(-3, 3, 80)
-t2 = np.linspace(-3, 3, 80)
-T1, T2 = np.meshgrid(t1, t2)
+    def compute_cft(self):
+        cos_ux = np.cos(2 * np.pi * self.u[None, :] * self.x[:, None])
+        sin_ux = np.sin(2 * np.pi * self.u[None, :] * self.x[:, None])
+        trap = np.trapezoid if hasattr(np, 'trapezoid') else np.trapz
+        A = trap(self.I[:, :, None] * cos_ux[None, :, :], x=self.x, axis=1)
+        B = trap(self.I[:, :, None] * sin_ux[None, :, :], x=self.x, axis=1)
+        cos_vy = np.cos(2 * np.pi * self.v[:, None] * self.y[None, :])
+        sin_vy = np.sin(2 * np.pi * self.v[:, None] * self.y[None, :])
+        term1 = trap(A[:, None, :] * cos_vy.T[:, :, None], x=self.y, axis=0)
+        term2 = trap(B[:, None, :] * sin_vy.T[:, :, None], x=self.y, axis=0)
+        term3 = trap(A[:, None, :] * sin_vy.T[:, :, None], x=self.y, axis=0)
+        term4 = trap(B[:, None, :] * cos_vy.T[:, :, None], x=self.y, axis=0)
+        return (term1 - term2) + 1j * (-(term3 + term4))
 
-u = np.linspace(-2, 2, 40)
-v = np.linspace(-2, 2, 40)
+# 1. Grids
+x = np.linspace(-3, 3, 100)
+y = np.linspace(-3, 3, 100)
+X, Y = np.meshgrid(x, y)
+u = np.linspace(-2, 2, 80)
+v = np.linspace(-2, 2, 80)
 
-# Two signals: 2D Gaussian and 2D Rect
-x1 = np.exp(-(T1**2 + T2**2))
-x2 = np.where((np.abs(T1) <= 1.0) & (np.abs(T2) <= 1.0), 1.0, 0.0)
-
+# 2. Signals
+I1 = np.exp(-(X**2 + Y**2))
+I2 = np.where((np.abs(X) <= 1.0) & (np.abs(Y) <= 1.0), 1.0, 0.0)
 a_const, b_const = 2.0, -1.5
-y = a_const * x1 + b_const * x2
+I_combo = a_const * I1 + b_const * I2
 
-X1_uv = compute_2d_cft(x1, t1, t2, u, v)
-X2_uv = compute_2d_cft(x2, t1, t2, u, v)
-Y_num = compute_2d_cft(y, t1, t2, u, v)
+# 3. Fast Separable 2D CFT
+F1 = CFT2D(I1, x, y, u, v).compute_cft()
+F2 = CFT2D(I2, x, y, u, v).compute_cft()
+Y_num = CFT2D(I_combo, x, y, u, v).compute_cft()
+Y_theo = a_const * F1 + b_const * F2
 
-# Theoretical spectrum
-Y_theo = a_const * X1_uv + b_const * X2_uv
-
-# Error Verification
+# 4. Error Metrics
 mse_mag = np.mean((np.abs(Y_num) - np.abs(Y_theo)) ** 2)
 mse_phase = np.mean((np.angle(Y_num) - np.angle(Y_theo)) ** 2)
 
@@ -56,8 +55,8 @@ print(f"[01. 2D Linearity] Magnitude MSE : {mse_mag:.6e}")
 print(f"[01. 2D Linearity] Phase MSE     : {mse_phase:.6e}")
 
 fig, axs = plt.subplots(1, 3, figsize=(14, 4))
-axs[0].imshow(y, extent=[t1[0], t1[-1], t2[0], t2[-1]], origin='lower', cmap='viridis')
-axs[0].set_title(r'$y(t_1, t_2) = a x_1 + b x_2$')
+axs[0].imshow(I_combo, extent=[x[0], x[-1], y[0], y[-1]], origin='lower', cmap='viridis')
+axs[0].set_title(r'$y(x, y) = a I_1 + b I_2$')
 axs[1].imshow(np.abs(Y_num), extent=[u[0], u[-1], v[0], v[-1]], origin='lower', cmap='plasma')
 axs[1].set_title(r'Numerical $|Y(u, v)|$')
 axs[2].imshow(np.abs(np.abs(Y_num) - np.abs(Y_theo)), extent=[u[0], u[-1], v[0], v[-1]], origin='lower', cmap='inferno')
