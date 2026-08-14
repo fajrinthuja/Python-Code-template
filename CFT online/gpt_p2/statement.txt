@@ -1,0 +1,23 @@
+================================================================================
+CSE 220: Signals and Linear Systems
+Practice Lab Problem 02: Fourier Series Synthesis & Reconstruction Error
+================================================================================
+
+Problem Statement:
+A continuous periodic triangular waveform x(t) with fundamental period T0 = 4 
+(f0 = 0.25 Hz) is defined over one period t in [-2, 2] as:
+    x(t) = 1 - |t|   for |t| <= 1
+    x(t) = 0         for 1 < |t| <= 2
+
+Tasks:
+1. Sample one fundamental period over t_period in [-2, 2] with 1000 samples.
+2. Compute the complex Fourier Series coefficients c_n for harmonic indices 
+   n in [-N, N] using numerical integration:
+       c_n = (1 / T0) * \int_{-T0/2}^{T0/2} x(t) * exp(-j * 2 * pi * n * f0 * t) dt
+3. Synthesize and reconstruct the signal over 3 periods t_eval in [-6, 6] using:
+       x_hat_N(t) = \sum_{n=-N}^{N} c_n * exp(j * 2 * pi * n * f0 * t)
+4. Evaluate the reconstruction for harmonic limits N in {3, 7, 25, 50}.
+5. For each value of N, compute the Mean Squared Reconstruction Error:
+       MSE_recon = (1 / M) * \sum_{m=1}^{M} |x(t_m) - x_hat_N(t_m)|^2
+6. Plot the original repeating waveform against x_hat_N(t) to visualize Gibbs 
+   phenomenon and convergence rate.
