@@ -1,0 +1,22 @@
+================================================================================
+CSE 220: Signals and Linear Systems
+Practice Lab Problem 05: 2D Anisotropic Spatial Scaling & Bilinear Interpolation
+================================================================================
+
+Problem Statement:
+The 2D spatial scaling property of the Continuous Fourier Transform states:
+    y(x, y) = I(a * x, b * y)  <--->  Y(u, v) = (1 / |a * b|) * F(u / a, v / b)
+
+Tasks:
+1. Generate an anisotropic 2D Gaussian signal over x, y in [-3, 3] (80 x 80):
+       I(x, y) = exp(-(2 * x^2 + 0.5 * y^2))
+2. Construct the spatially transformed signal with a = 0.5 and b = 2.0:
+       I_trans(x, y) = I(a * x, b * y)
+3. Compute the 2D continuous transforms F(u, v) and Y_num(u, v) on u, v in [-3, 3] 
+   using separable trapezoidal integration.
+4. Calculate the theoretical spectrum Y_theo(u, v) by evaluating F(u/a, v/b) 
+   via 2D complex bilinear interpolation and scaling by (1 / |a * b|).
+5. Compute the 2D Magnitude Mean Squared Error:
+       MSE_mag_2d = mean( (|Y_num(u, v)| - |Y_theo(u, v)|)^2 )
+6. Render the 2D magnitude heatmaps for |Y_num(u, v)|, |Y_theo(u, v)|, and 
+   the absolute error map ||Y_num(u, v)| - |Y_theo(u, v)||.
