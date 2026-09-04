@@ -71,12 +71,15 @@ def to_limbs(text, base_digits=BASE_DIGITS):
     if not text:
         return 1, np.zeros(1, dtype=np.int64)
 
+    # Reverse the string so the lowest-order digits come first
     rev = text[::-1]
     n = len(rev)
     limbs = []
-    
+
+    # Standard forward loop stepping by base_digits
     for i in range(0, n, base_digits):
         chunk = rev[i : i + base_digits]
+        # Reverse the chunk back to normal order to parse its integer value
         limbs.append(int(chunk[::-1]))
 
     return sign, np.array(limbs, dtype=np.int64)
@@ -210,59 +213,131 @@ def multiply(text_a, text_b, method):
     product = from_limbs(sign, raw_conv, BASE_DIGITS)
     return product, N, limbs_a, limbs_b
 
-import sys
-import math
 
-sys.setrecursionlimit(300000)
+def run_single(path, method, out_dir):
+    """
+    Process one input file and write the required outputs.
 
-inf = 10**18
-M = 10**9 + 7
-mod = 998244353
-eps = 1e-7
-pi = 2 * math.acos(0)
+    Must produce, inside ``out_dir``:
+      product.txt -- the product as a single decimal string
+      report.txt  -- input path, method, digit counts of both operands, the
+                     base used, limb counts, the transform length N, the digit
+                     count of the product, and the verification verdict.
+                     It is written by your code; there is no separate
+                     write-up to hand in.
 
-# Helper function to get individual tokens line-by-line
-def token_generator():
-    for line in sys.stdin:
-        for token in line.split():
-            yield token
+    Verification: compare your product against ``int(text_a) * int(text_b)``.
+    This is the ONLY place Python's big integers may be used. Print MATCH or
+    MISMATCH; a MISMATCH must not be silently swallowed.
+    """
+    text_a, text_b = read_operands(path)
+    product_str, N, limbs_a, limbs_b = multiply(text_a, text_b, method)
 
-def solve(iterator):
-    a = [3,2,1]
-    b = [5,4]
-    s = ""
-    for i in a:
-        s += str(i)
-    s = s[::-1]
-    t = ""
-    for i in b:
-        t += str(i)
-    t = t[::-1]
+    ground_truth = str(int(text_a) * int(text_b))
+    is_match = (product_str == ground_truth)
+    verdict = "MATCH" if is_match else "MISMATCH"
 
-    ans = multiply(s, t, "fft")
-    print(ans)
+    if not is_match:
+        print(f"VERIFICATION FAILURE: Result does not match Python int multiplication for {path}!")
 
-    s = ans[0]
+    write_text(os.path.join(out_dir, "product.txt"), product_str + "\n")
 
-    
+    # Operand digit counts (strip signs)
+    digits_a = len(text_a.strip().lstrip("+-"))
+    digits_b = len(text_b.strip().lstrip("+-"))
+    digits_prod = len(product_str.lstrip("-"))
 
-    for i in range(len(s)):
+    report_lines = [
+        "Task A -- Big-Integer Multiplication Report",
+        "-------------------------------------------",
+        f"Input file           : {path}",
+        f"Method               : {method}",
+        f"Base                 : 10^{BASE_DIGITS} ({BASE})",
+        f"Operand A digits     : {digits_a}",
+        f"Operand B digits     : {digits_b}",
+        f"Operand A limbs      : {len(limbs_a)}",
+        f"Operand B limbs      : {len(limbs_b)}",
+        f"Transform length N   : {N}",
+        f"Product digits       : {digits_prod}",
+        f"Verification verdict : {verdict}",
+    ]
+    write_report(os.path.join(out_dir, "report.txt"), report_lines)
+    print(f"[{verdict}] Processed {path} using {method}: product digits={digits_prod}, N={N}")
 
 
-    pass
+# ---------------------------------------------------------------------------
+# PROVIDED -- run_benchmark is already written. It calls your multiply(), so
+# it starts working as soon as your transforms and multiply() are correct.
+# You do not need to modify anything below (though you may extend it).
+# ---------------------------------------------------------------------------
+DFT_SIZES = [128, 256, 512, 1024, 2048, 4096]
+FFT_SIZES = [128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072]
+TIME_BUDGET = 20.0          # stop a sweep once one measurement exceeds this
+
+
+def run_benchmark(out_dir):
+    """
+    Measure naive DFT against radix-2 FFT over growing operands and write
+    runtime_bigmul.png plus the timing table in report.txt.
+
+    Each sweep stops early once a single measurement exceeds TIME_BUDGET
+    seconds, so a slow machine (or a slow DFT) simply produces a shorter
+    curve rather than hanging.
+    """
+    def measure(label, method, sizes):
+        xs, ys = [], []
+        print("%s:" % label)
+        for digits in sizes:
+            a = random_decimal(digits, seed=digits)
+            b = random_decimal(digits, seed=digits + 1)
+            seconds = time_best(lambda: multiply(a, b, method), repeats=2)
+            xs.append(digits)
+            ys.append(seconds)
+            print("  %8d digits   %9.4f s" % (digits, seconds))
+            if seconds > TIME_BUDGET:
+                print("  (stopping this curve -- over the time budget)")
+                break
+        return xs, ys
+
+    series = {}
+    series["Naive DFT"] = measure("naive DFT", "dft", DFT_SIZES)
+    series["Radix-2 FFT"] = measure("radix-2 FFT", "fft", FFT_SIZES)
+    try:                                    # optional third curve
+        series["Schoolbook"] = measure("schoolbook", "schoolbook", FFT_SIZES)
+    except NotImplementedError:
+        series.pop("Schoolbook", None)
+        print("schoolbook: not implemented, skipping that curve")
+
+    plot_path = os.path.join(out_dir, "runtime_bigmul.png")
+    plot_runtime_curve(series, plot_path,
+                       title="Task A: big-integer multiplication",
+                       xlabel="decimal digits per operand",
+                       references=("n2", "nlogn"))
+    write_report(os.path.join(out_dir, "report.txt"),
+                 ["Task A -- runtime benchmark", ""]
+                 + timing_table_lines(series, size_label="digits")
+                 + ["", "plot: %s" % os.path.basename(plot_path)])
+    print("wrote", plot_path)
+
 
 def main():
-    iterator = token_generator()
+    ap = argparse.ArgumentParser(description="Big-integer multiplication by DFT/FFT")
+    ap.add_argument("input", nargs="?", help="input file with the two operands")
+    ap.add_argument("--engine", default="fft",
+                    choices=["dft", "fft", "schoolbook", "arbitrary"])
+    ap.add_argument("--out-dir", default="outputs")
+    ap.add_argument("--benchmark", action="store_true",
+                    help="run the timing study instead of a single multiplication")
+    args = ap.parse_args()
 
-    t = 1
-    
-    # try:
-    #     t = int(next(iterator))
-    # except StopIteration:
-    #     return
-        
-    for _ in range(t):
-        solve(iterator)
+    os.makedirs(args.out_dir, exist_ok=True)
+    if args.benchmark:
+        run_benchmark(args.out_dir)
+    else:
+        if not args.input:
+            ap.error("an input file is required unless --benchmark is given")
+        run_single(args.input, args.engine, args.out_dir)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

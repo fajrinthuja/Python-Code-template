@@ -1,0 +1,11 @@
+Task B -- Image Convolution Report
+-----------------------------------
+Input image              : images/skyline256.png
+Image size               : 256 x 256
+Kernel                   : gaussian (param=15)
+Kernel size              : 15 x 15
+Engine                   : dft
+Linear convolution size  : 270 x 270
+Transform size used      : 270 x 270
+Verification max error   : 2.5091e-14
+Verification verdict     : MATCH

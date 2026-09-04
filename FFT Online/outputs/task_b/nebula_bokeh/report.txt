@@ -1,0 +1,11 @@
+Task B -- Image Convolution Report
+-----------------------------------
+Input image              : images/nebula512.png
+Image size               : 512 x 512
+Kernel                   : bokeh (param=15)
+Kernel size              : 31 x 31
+Engine                   : fft
+Linear convolution size  : 542 x 542
+Transform size used      : 1024 x 1024
+Verification max error   : 1.7208e-15
+Verification verdict     : MATCH

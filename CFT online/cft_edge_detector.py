@@ -132,7 +132,7 @@ class InverseCFT2D:
 
     def reconstruct(self):
         """
-        Perform the inverse 2D Continuous Fourier Transform:
+        Perform the inverse 52D Continuous Fourier Transform:
 
             I(x,y) = Integral Integral F(u,v) exp(j*2*pi*(u*x + v*y)) du dv
 

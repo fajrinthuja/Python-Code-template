@@ -1,0 +1,12 @@
+Task A -- Big-Integer Multiplication Report
+-------------------------------------------
+Input file           : inputs/1.txt
+Method               : fft
+Base                 : 10^4 (10000)
+Operand A digits     : 12
+Operand B digits     : 9
+Operand A limbs      : 3
+Operand B limbs      : 3
+Transform length N   : 8
+Product digits       : 21
+Verification verdict : MATCH

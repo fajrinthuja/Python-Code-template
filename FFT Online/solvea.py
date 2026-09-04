@@ -244,12 +244,15 @@ def solve(iterator):
 
     s = ans[0]
 
-    
+    n = len(s)
+    answer = [0] * n
+
 
     for i in range(len(s)):
+        answer[i] = int(s[n - 1 - i])
 
+    print(answer)
 
-    pass
 
 def main():
     iterator = token_generator()

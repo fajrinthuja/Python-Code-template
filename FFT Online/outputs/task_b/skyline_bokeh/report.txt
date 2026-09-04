@@ -1,0 +1,11 @@
+Task B -- Image Convolution Report
+-----------------------------------
+Input image              : images/skyline512.png
+Image size               : 512 x 512
+Kernel                   : bokeh (param=9)
+Kernel size              : 19 x 19
+Engine                   : fft
+Linear convolution size  : 530 x 530
+Transform size used      : 1024 x 1024
+Verification max error   : 3.3307e-15
+Verification verdict     : MATCH
