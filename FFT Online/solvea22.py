@@ -228,8 +228,8 @@ def token_generator():
             yield token
 
 def solve(iterator):
-    a = [3,2,1]
-    b = [5,4]
+    a = [9,9,9]
+    b = [9,9]
     s = ""
     for i in a:
         s += str(i)
